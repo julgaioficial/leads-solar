@@ -31,7 +31,7 @@ const integrators = [
     owner: "Maria Santos",
     email: "maria@energiaverde.com",
     plan: "BASIC",
-    mrr: 197,
+    mrr: 99.9,
     status: "TRIAL",
     leads: 45,
     credits: "45/60",
