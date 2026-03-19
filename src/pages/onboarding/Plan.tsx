@@ -9,14 +9,14 @@ const plans = [
   {
     id: "basic",
     name: "Básico",
-    price: "197",
+    price: "99,90",
     credits: 60,
     features: ["60 créditos/mês", "1 WhatsApp", "Dashboard completo", "Suporte por email"],
   },
   {
     id: "pro",
     name: "Pro",
-    price: "397",
+    price: "199,90",
     credits: 150,
     popular: true,
     features: [

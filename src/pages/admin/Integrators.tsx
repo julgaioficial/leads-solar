@@ -67,7 +67,7 @@ const integrators = [
     owner: "Carlos Lima",
     email: "carlos@ecoenergy.com",
     plan: "PRO",
-    mrr: 397,
+    mrr: 199.9,
     status: "ACTIVE",
     leads: 178,
     credits: "134/150",
