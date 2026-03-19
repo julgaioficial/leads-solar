@@ -19,7 +19,7 @@ const integrators = [
     owner: "João Silva",
     email: "joao@solartech.com",
     plan: "PRO",
-    mrr: 397,
+    mrr: 199.9,
     status: "ACTIVE",
     leads: 156,
     credits: "120/150",
