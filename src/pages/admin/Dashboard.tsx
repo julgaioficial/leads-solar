@@ -146,7 +146,7 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="py-3 px-2">
-                        R$ {integrator.mrr}
+                        R$ {integrator.mrr.toFixed(2).replace('.', ',')}
                       </td>
                       <td className="py-3 px-2">{integrator.leads}</td>
                       <td className="py-3 px-2">
