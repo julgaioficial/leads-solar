@@ -43,7 +43,7 @@ const integrators = [
     owner: "Pedro Costa",
     email: "pedro@solecia.com",
     plan: "PRO",
-    mrr: 397,
+    mrr: 199.9,
     status: "ACTIVE",
     leads: 234,
     credits: "89/150",
