@@ -22,7 +22,7 @@ export function CTA() {
 
           <p className="text-lg text-background/70 mb-8 max-w-2xl mx-auto">
             Junte-se a +50 integradores que já economizam 20+ horas por mês
-            com o ZapSolar. Comece seu trial de 7 dias grátis hoje.
+            com o Leads Solar. Comece seu trial de 7 dias grátis hoje.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

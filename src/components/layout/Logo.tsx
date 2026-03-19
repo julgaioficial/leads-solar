@@ -18,7 +18,7 @@ export function Logo({ className = "", size = "md", showText = true }: LogoProps
     <div className={`flex items-center gap-2 ${className}`}>
       <img 
         src={logo} 
-        alt="ZapSolar" 
+        alt="Leads Solar" 
         className={`${sizeClasses[size]} w-auto object-contain`}
       />
     </div>

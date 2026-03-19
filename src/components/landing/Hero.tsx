@@ -88,7 +88,7 @@ export function Hero() {
               <div className="flex-1 text-center">
                 <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-background/50 text-xs text-muted-foreground">
                   <div className="w-3 h-3 bg-secondary rounded-full" />
-                  app.zapsolar.com.br
+                  www.leadssolar.com.br
                 </div>
               </div>
             </div>

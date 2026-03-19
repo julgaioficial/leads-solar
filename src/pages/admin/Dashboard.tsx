@@ -62,7 +62,7 @@ export default function AdminDashboard() {
         <div>
           <h2 className="text-2xl font-bold">Dashboard Administrativo</h2>
           <p className="text-muted-foreground">
-            Visão geral da plataforma ZapSolar
+            Visão geral da plataforma Leads Solar
           </p>
         </div>
 
