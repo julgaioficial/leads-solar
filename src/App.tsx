@@ -21,6 +21,8 @@ import OnboardingPlan from "./pages/onboarding/Plan";
 import DashboardHome from "./pages/dashboard/Home";
 import DashboardLeads from "./pages/dashboard/Leads";
 import DashboardKits from "./pages/dashboard/Kits";
+import DashboardWhatsApp from "./pages/dashboard/WhatsApp";
+import DashboardFlows from "./pages/dashboard/Flows";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
