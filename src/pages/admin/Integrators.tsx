@@ -55,7 +55,7 @@ const integrators = [
     owner: "Ana Oliveira",
     email: "ana@powersolar.com",
     plan: "BASIC",
-    mrr: 197,
+    mrr: 99.9,
     status: "PAST_DUE",
     leads: 89,
     credits: "0/60",
