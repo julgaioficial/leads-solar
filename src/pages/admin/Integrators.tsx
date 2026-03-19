@@ -19,7 +19,7 @@ const integrators = [
     owner: "João Silva",
     email: "joao@solartech.com",
     plan: "PRO",
-    mrr: 397,
+    mrr: 199.9,
     status: "ACTIVE",
     leads: 156,
     credits: "120/150",
@@ -31,7 +31,7 @@ const integrators = [
     owner: "Maria Santos",
     email: "maria@energiaverde.com",
     plan: "BASIC",
-    mrr: 197,
+    mrr: 99.9,
     status: "TRIAL",
     leads: 45,
     credits: "45/60",
@@ -43,7 +43,7 @@ const integrators = [
     owner: "Pedro Costa",
     email: "pedro@solecia.com",
     plan: "PRO",
-    mrr: 397,
+    mrr: 199.9,
     status: "ACTIVE",
     leads: 234,
     credits: "89/150",
@@ -55,7 +55,7 @@ const integrators = [
     owner: "Ana Oliveira",
     email: "ana@powersolar.com",
     plan: "BASIC",
-    mrr: 197,
+    mrr: 99.9,
     status: "PAST_DUE",
     leads: 89,
     credits: "0/60",
@@ -67,7 +67,7 @@ const integrators = [
     owner: "Carlos Lima",
     email: "carlos@ecoenergy.com",
     plan: "PRO",
-    mrr: 397,
+    mrr: 199.9,
     status: "ACTIVE",
     leads: 178,
     credits: "134/150",
@@ -187,7 +187,7 @@ export default function AdminIntegrators() {
                       {integrator.plan}
                     </span>
                   </TableCell>
-                  <TableCell>R$ {integrator.mrr}</TableCell>
+                  <TableCell>R$ {integrator.mrr.toFixed(2).replace('.', ',')}</TableCell>
                   <TableCell>{integrator.credits}</TableCell>
                   <TableCell>{integrator.leads}</TableCell>
                   <TableCell>

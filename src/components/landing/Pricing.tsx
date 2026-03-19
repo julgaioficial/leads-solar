@@ -5,7 +5,7 @@ import { Check, Zap } from "lucide-react";
 const plans = [
   {
     name: "Básico",
-    price: "197",
+    price: "99,90",
     credits: "60",
     description: "Ideal para integradores iniciantes",
     features: [
@@ -21,7 +21,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "397",
+    price: "199,90",
     credits: "150",
     description: "Para integradores estabelecidos",
     features: [
