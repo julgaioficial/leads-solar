@@ -40,11 +40,11 @@ const stats = [
 ];
 
 const recentIntegrators = [
-  { name: "Solar Tech SP", plan: "PRO", mrr: 397, status: "ACTIVE", leads: 156 },
-  { name: "Energia Verde RJ", plan: "BASIC", mrr: 197, status: "TRIAL", leads: 45 },
-  { name: "Sol & Cia MG", plan: "PRO", mrr: 397, status: "ACTIVE", leads: 234 },
-  { name: "Power Solar PR", plan: "BASIC", mrr: 197, status: "PAST_DUE", leads: 89 },
-  { name: "Eco Energy SC", plan: "PRO", mrr: 397, status: "ACTIVE", leads: 178 },
+  { name: "Solar Tech SP", plan: "PRO", mrr: 199.9, status: "ACTIVE", leads: 156 },
+  { name: "Energia Verde RJ", plan: "BASIC", mrr: 99.9, status: "TRIAL", leads: 45 },
+  { name: "Sol & Cia MG", plan: "PRO", mrr: 199.9, status: "ACTIVE", leads: 234 },
+  { name: "Power Solar PR", plan: "BASIC", mrr: 99.9, status: "PAST_DUE", leads: 89 },
+  { name: "Eco Energy SC", plan: "PRO", mrr: 199.9, status: "ACTIVE", leads: 178 },
 ];
 
 const statusColors = {
