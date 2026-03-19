@@ -21,7 +21,7 @@ export default function Login() {
 
     // Demo login logic - replace with real auth
     setTimeout(() => {
-      if (email === "admin@zapsolar.com") {
+      if (email === "admin@leadssolar.com") {
         navigate("/admin/dashboard");
       } else {
         navigate("/dashboard/home");

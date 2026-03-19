@@ -6,7 +6,7 @@ const steps = [
     step: "01",
     title: "Cliente envia mensagem",
     description:
-      "Seu cliente entra em contato pelo WhatsApp. O bot ZapSolar inicia a conversa automaticamente.",
+      "Seu cliente entra em contato pelo WhatsApp. O bot Leads Solar inicia a conversa automaticamente.",
   },
   {
     icon: Bot,

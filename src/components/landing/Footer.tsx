@@ -55,7 +55,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-background/10 text-center text-sm text-background/50">
-          <p>© {new Date().getFullYear()} ZapSolar. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Leads Solar. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

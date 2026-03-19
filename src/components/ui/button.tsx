@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/90 active:scale-[0.98]",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Custom ZapSolar variants
+        // Custom Leads Solar variants
         solar: "bg-gradient-cta text-primary-foreground shadow-solar hover:shadow-[0_15px_50px_-10px_hsl(32_95%_52%_/_0.45)] hover:scale-[1.02] active:scale-[0.98]",
         panel: "bg-gradient-panel text-secondary-foreground shadow-panel hover:shadow-[0_15px_50px_-10px_hsl(168_55%_38%_/_0.4)] hover:scale-[1.02] active:scale-[0.98]",
         "solar-outline": "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground active:scale-[0.98]",

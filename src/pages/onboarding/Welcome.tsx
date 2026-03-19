@@ -58,7 +58,7 @@ export default function OnboardingWelcome() {
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Bem-vindo ao ZapSolar! 🎉
+            Bem-vindo ao Leads Solar! 🎉
           </h1>
 
           <p className="text-lg text-muted-foreground mb-8">

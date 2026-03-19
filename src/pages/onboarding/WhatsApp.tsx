@@ -20,7 +20,7 @@ const steps = [
   {
     id: 3,
     title: "Escaneie o QR Code",
-    description: "Conecte seu WhatsApp ao ZapSolar escaneando o código.",
+    description: "Conecte seu WhatsApp ao Leads Solar escaneando o código.",
     icon: QrCode,
   },
 ];
