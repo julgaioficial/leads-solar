@@ -114,7 +114,7 @@ export function Pricing() {
 
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground">
-            💡 1 crédito = 1 pré-orçamento enviado •{" "}
+            💡 Limite mensal de pré-orçamentos gerados pelo chatbot •{" "}
             <span className="text-primary">ROI médio de 915%</span>
           </p>
         </div>
