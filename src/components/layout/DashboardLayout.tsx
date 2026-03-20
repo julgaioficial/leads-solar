@@ -21,8 +21,8 @@ const menuItems = [
   { icon: Home, label: "Dashboard", path: "/dashboard/home" },
   { icon: Users, label: "Leads", path: "/dashboard/leads" },
   { icon: Package, label: "Kits", path: "/dashboard/kits" },
+  { icon: MessageSquare, label: "Chatbot", path: "/dashboard/chatbot" },
   { icon: MessageSquare, label: "Fluxo de Conversa", path: "/dashboard/flows" },
-  { icon: MessageSquare, label: "WhatsApp", path: "/dashboard/whatsapp" },
   { icon: CreditCard, label: "Assinatura", path: "/dashboard/account" },
   { icon: Settings, label: "Configurações", path: "/dashboard/settings" },
 ];

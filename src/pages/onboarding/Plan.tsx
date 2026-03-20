@@ -96,7 +96,7 @@ export default function OnboardingPlan() {
                     <span className="text-muted-foreground">/mês</span>
                   </div>
                   <p className="text-sm text-secondary mt-1">
-                    {plan.credits} créditos inclusos
+                    {plan.budgets} pré-orçamentos inclusos
                   </p>
                 </div>
 
