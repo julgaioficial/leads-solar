@@ -158,7 +158,7 @@ export default function AdminIntegrators() {
                 <TableHead>Empresa</TableHead>
                 <TableHead>Plano</TableHead>
                 <TableHead>MRR</TableHead>
-                <TableHead>Créditos</TableHead>
+                <TableHead>Orçamentos</TableHead>
                 <TableHead>Leads</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Desde</TableHead>
