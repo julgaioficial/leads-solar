@@ -40,11 +40,11 @@ const stats = [
 ];
 
 const recentIntegrators = [
-  { name: "Solar Tech SP", plan: "PRO", mrr: 199.9, status: "ACTIVE", leads: 156 },
-  { name: "Energia Verde RJ", plan: "BASIC", mrr: 99.9, status: "TRIAL", leads: 45 },
-  { name: "Sol & Cia MG", plan: "PRO", mrr: 199.9, status: "ACTIVE", leads: 234 },
-  { name: "Power Solar PR", plan: "BASIC", mrr: 99.9, status: "PAST_DUE", leads: 89 },
-  { name: "Eco Energy SC", plan: "PRO", mrr: 199.9, status: "ACTIVE", leads: 178 },
+  { name: "Solar Tech SP", plan: "PRO", mrr: 149.9, status: "ACTIVE", leads: 156 },
+  { name: "Energia Verde RJ", plan: "BASIC", mrr: 69.9, status: "TRIAL", leads: 45 },
+  { name: "Sol & Cia MG", plan: "PRO", mrr: 149.9, status: "ACTIVE", leads: 234 },
+  { name: "Power Solar PR", plan: "BASIC", mrr: 69.9, status: "PAST_DUE", leads: 89 },
+  { name: "Eco Energy SC", plan: "PRO", mrr: 149.9, status: "ACTIVE", leads: 178 },
 ];
 
 const statusColors = {
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                     1 integrador com pagamento atrasado
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Power Solar PR - R$ 99,90
+                    Power Solar PR - R$ 69,90
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-accent/50 border border-accent/50">

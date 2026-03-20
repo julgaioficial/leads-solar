@@ -19,10 +19,10 @@ const integrators = [
     owner: "João Silva",
     email: "joao@solartech.com",
     plan: "PRO",
-    mrr: 199.9,
+    mrr: 149.9,
     status: "ACTIVE",
     leads: 156,
-    credits: "120/150",
+    budgets: "189/250",
     joinedAt: "2024-01-05",
   },
   {
@@ -31,10 +31,10 @@ const integrators = [
     owner: "Maria Santos",
     email: "maria@energiaverde.com",
     plan: "BASIC",
-    mrr: 99.9,
+    mrr: 69.9,
     status: "TRIAL",
     leads: 45,
-    credits: "45/60",
+    budgets: "45/100",
     joinedAt: "2024-01-12",
   },
   {
@@ -43,10 +43,10 @@ const integrators = [
     owner: "Pedro Costa",
     email: "pedro@solecia.com",
     plan: "PRO",
-    mrr: 199.9,
+    mrr: 149.9,
     status: "ACTIVE",
     leads: 234,
-    credits: "89/150",
+    budgets: "89/250",
     joinedAt: "2023-12-20",
   },
   {
@@ -55,10 +55,10 @@ const integrators = [
     owner: "Ana Oliveira",
     email: "ana@powersolar.com",
     plan: "BASIC",
-    mrr: 99.9,
+    mrr: 69.9,
     status: "PAST_DUE",
     leads: 89,
-    credits: "0/60",
+    budgets: "0/100",
     joinedAt: "2023-11-15",
   },
   {
@@ -67,10 +67,10 @@ const integrators = [
     owner: "Carlos Lima",
     email: "carlos@ecoenergy.com",
     plan: "PRO",
-    mrr: 199.9,
+    mrr: 149.9,
     status: "ACTIVE",
     leads: 178,
-    credits: "134/150",
+    budgets: "134/250",
     joinedAt: "2023-12-01",
   },
 ];
@@ -158,7 +158,7 @@ export default function AdminIntegrators() {
                 <TableHead>Empresa</TableHead>
                 <TableHead>Plano</TableHead>
                 <TableHead>MRR</TableHead>
-                <TableHead>Créditos</TableHead>
+                <TableHead>Orçamentos</TableHead>
                 <TableHead>Leads</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Desde</TableHead>
@@ -188,7 +188,7 @@ export default function AdminIntegrators() {
                     </span>
                   </TableCell>
                   <TableCell>R$ {integrator.mrr.toFixed(2).replace('.', ',')}</TableCell>
-                  <TableCell>{integrator.credits}</TableCell>
+                  <TableCell>{integrator.budgets}</TableCell>
                   <TableCell>{integrator.leads}</TableCell>
                   <TableCell>
                     <span

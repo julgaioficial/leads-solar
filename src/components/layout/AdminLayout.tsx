@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
   { icon: Users, label: "Integradores", path: "/admin/integrators" },
+  { icon: Shield, label: "Licenças", path: "/admin/licenses" },
   { icon: DollarSign, label: "Financeiro", path: "/admin/financeiro" },
   { icon: Settings, label: "Configurações", path: "/admin/settings" },
 ];

@@ -9,19 +9,19 @@ const plans = [
   {
     id: "basic",
     name: "Básico",
-    price: "99,90",
-    credits: 60,
-    features: ["60 créditos/mês", "1 WhatsApp", "Dashboard completo", "Suporte por email"],
+    price: "69,90",
+    budgets: 100,
+    features: ["100 pré-orçamentos/mês", "Chatbot responsivo", "Dashboard completo", "Suporte por email"],
   },
   {
     id: "pro",
     name: "Pro",
-    price: "199,90",
-    credits: 150,
+    price: "149,90",
+    budgets: 250,
     popular: true,
     features: [
-      "150 créditos/mês",
-      "1 WhatsApp",
+      "250 pré-orçamentos/mês",
+      "Chatbot responsivo",
       "Dashboard completo",
       "Suporte prioritário",
       "API de integração",
@@ -96,7 +96,7 @@ export default function OnboardingPlan() {
                     <span className="text-muted-foreground">/mês</span>
                   </div>
                   <p className="text-sm text-secondary mt-1">
-                    {plan.credits} créditos inclusos
+                    {plan.budgets} pré-orçamentos inclusos
                   </p>
                 </div>
 

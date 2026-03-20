@@ -26,14 +26,14 @@ const stats = [
     icon: TrendingUp,
   },
   {
-    label: "Créditos Restantes",
-    value: "47/60",
+    label: "Orçamentos Restantes",
+    value: "178/250",
     change: "",
     trend: "neutral",
     icon: CreditCard,
   },
   {
-    label: "Mensagens Hoje",
+    label: "Conversas Hoje",
     value: "156",
     change: "-3%",
     trend: "down",
@@ -158,7 +158,7 @@ export default function DashboardHome() {
                 </Button>
                 <Button variant="outline" className="w-full justify-start">
                   <CreditCard className="h-4 w-4 mr-2" />
-                  Comprar Mais Créditos
+                  Ver Orçamentos
                 </Button>
               </div>
             </div>

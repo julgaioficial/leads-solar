@@ -21,12 +21,14 @@ import OnboardingPlan from "./pages/onboarding/Plan";
 import DashboardHome from "./pages/dashboard/Home";
 import DashboardLeads from "./pages/dashboard/Leads";
 import DashboardKits from "./pages/dashboard/Kits";
-import DashboardWhatsApp from "./pages/dashboard/WhatsApp";
+import DashboardChatbot from "./pages/dashboard/Chatbot";
 import DashboardFlows from "./pages/dashboard/Flows";
+import DashboardSettings from "./pages/dashboard/Settings";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminIntegrators from "./pages/admin/Integrators";
+import AdminLicenses from "./pages/admin/Licenses";
 
 const queryClient = new QueryClient();
 
@@ -53,14 +55,15 @@ const App = () => (
           <Route path="/dashboard/home" element={<DashboardHome />} />
           <Route path="/dashboard/leads" element={<DashboardLeads />} />
           <Route path="/dashboard/kits" element={<DashboardKits />} />
-          <Route path="/dashboard/whatsapp" element={<DashboardWhatsApp />} />
+          <Route path="/dashboard/chatbot" element={<DashboardChatbot />} />
           <Route path="/dashboard/flows" element={<DashboardFlows />} />
           <Route path="/dashboard/account" element={<DashboardHome />} />
-          <Route path="/dashboard/settings" element={<DashboardHome />} />
+          <Route path="/dashboard/settings" element={<DashboardSettings />} />
 
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/integrators" element={<AdminIntegrators />} />
+          <Route path="/admin/licenses" element={<AdminLicenses />} />
           <Route path="/admin/financeiro" element={<AdminDashboard />} />
           <Route path="/admin/settings" element={<AdminDashboard />} />
 
