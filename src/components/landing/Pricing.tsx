@@ -5,12 +5,12 @@ import { Check, Zap } from "lucide-react";
 const plans = [
   {
     name: "Básico",
-    price: "99,90",
-    credits: "60",
+    price: "69,90",
+    budgets: "100",
     description: "Ideal para integradores iniciantes",
     features: [
-      "60 créditos/mês",
-      "1 WhatsApp conectado",
+      "100 pré-orçamentos/mês",
+      "Chatbot responsivo",
       "Dashboard completo",
       "Suporte por email",
       "Gestão de kits",
@@ -21,12 +21,12 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "199,90",
-    credits: "150",
+    price: "149,90",
+    budgets: "250",
     description: "Para integradores estabelecidos",
     features: [
-      "150 créditos/mês",
-      "1 WhatsApp conectado",
+      "250 pré-orçamentos/mês",
+      "Chatbot responsivo",
       "Dashboard completo",
       "Suporte prioritário",
       "Gestão de kits avançada",
