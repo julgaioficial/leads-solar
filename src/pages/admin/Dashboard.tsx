@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                     1 integrador com pagamento atrasado
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Power Solar PR - R$ 99,90
+                    Power Solar PR - R$ 69,90
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-accent/50 border border-accent/50">

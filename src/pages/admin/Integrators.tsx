@@ -188,7 +188,7 @@ export default function AdminIntegrators() {
                     </span>
                   </TableCell>
                   <TableCell>R$ {integrator.mrr.toFixed(2).replace('.', ',')}</TableCell>
-                  <TableCell>{integrator.credits}</TableCell>
+                  <TableCell>{integrator.budgets}</TableCell>
                   <TableCell>{integrator.leads}</TableCell>
                   <TableCell>
                     <span
