@@ -21,12 +21,14 @@ import OnboardingPlan from "./pages/onboarding/Plan";
 import DashboardHome from "./pages/dashboard/Home";
 import DashboardLeads from "./pages/dashboard/Leads";
 import DashboardKits from "./pages/dashboard/Kits";
-import DashboardWhatsApp from "./pages/dashboard/WhatsApp";
+import DashboardChatbot from "./pages/dashboard/Chatbot";
 import DashboardFlows from "./pages/dashboard/Flows";
+import DashboardSettings from "./pages/dashboard/Settings";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminIntegrators from "./pages/admin/Integrators";
+import AdminLicenses from "./pages/admin/Licenses";
 
 const queryClient = new QueryClient();
 
