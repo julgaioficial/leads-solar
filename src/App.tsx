@@ -55,10 +55,10 @@ const App = () => (
           <Route path="/dashboard/home" element={<DashboardHome />} />
           <Route path="/dashboard/leads" element={<DashboardLeads />} />
           <Route path="/dashboard/kits" element={<DashboardKits />} />
-          <Route path="/dashboard/whatsapp" element={<DashboardWhatsApp />} />
+          <Route path="/dashboard/chatbot" element={<DashboardChatbot />} />
           <Route path="/dashboard/flows" element={<DashboardFlows />} />
           <Route path="/dashboard/account" element={<DashboardHome />} />
-          <Route path="/dashboard/settings" element={<DashboardHome />} />
+          <Route path="/dashboard/settings" element={<DashboardSettings />} />
 
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
