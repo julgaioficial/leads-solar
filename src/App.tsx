@@ -30,6 +30,9 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminIntegrators from "./pages/admin/Integrators";
 import AdminLicenses from "./pages/admin/Licenses";
 
+// Public White-Label Page
+import WhiteLabelPage from "./pages/public/WhiteLabelPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
