@@ -70,6 +70,9 @@ const App = () => (
           <Route path="/admin/financeiro" element={<AdminDashboard />} />
           <Route path="/admin/settings" element={<AdminDashboard />} />
 
+          {/* White-Label Public Pages */}
+          <Route path="/s/:slug" element={<WhiteLabelPage />} />
+
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
