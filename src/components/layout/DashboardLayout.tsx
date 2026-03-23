@@ -99,7 +99,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* User Section */}
         <div className="p-4 border-t border-sidebar-border">
           <button
-            onClick={() => navigate("/login")}
+            onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
