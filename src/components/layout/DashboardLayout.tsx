@@ -127,7 +127,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
             </button>
             <div className="w-9 h-9 rounded-full bg-gradient-cta flex items-center justify-center text-primary-foreground font-semibold text-sm">
-              JS
+              {initials}
             </div>
           </div>
         </header>

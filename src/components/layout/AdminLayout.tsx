@@ -97,7 +97,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {/* User Section */}
         <div className="p-4 border-t border-background/10">
           <button
-            onClick={() => navigate("/login")}
+            onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-background/70 hover:bg-background/10 transition-colors"
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
