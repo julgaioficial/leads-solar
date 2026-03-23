@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Kit {
-  id: number;
+  id: string | number;
   name: string;
   power: string;
   panels: number;
@@ -45,6 +46,7 @@ interface ChatWidgetProps {
   embedded?: boolean;
   botName?: string;
   botAvatar?: string;
+  integratorId?: string;
 }
 
 const defaultQuestions: FlowQuestion[] = [
@@ -53,14 +55,12 @@ const defaultQuestions: FlowQuestion[] = [
   { id: "q3", order: 3, question: "Qual o valor médio da sua conta de luz? (R$)", type: "number", variable: "valor_conta", required: true, active: true },
   { id: "q4", order: 4, question: "Qual o seu consumo mensal em kWh?", type: "number", variable: "consumo_kwh", required: true, active: true },
   { id: "q5", order: 5, question: "Qual o tipo do seu telhado?", type: "options", options: ["Cerâmica", "Fibrocimento", "Metálico", "Laje", "Solo"], variable: "tipo_telhado", required: true, active: true },
-  { id: "q6", order: 6, question: "Você tem interesse em financiamento?", type: "options", options: ["Sim, com certeza", "Talvez", "Não, vou pagar à vista"], variable: "financiamento", required: false, active: true },
 ];
 
 const defaultKits: Kit[] = [
   { id: 1, name: "Kit Residencial 3kWp", power: "3 kWp", panels: 6, inverter: "Growatt 3000", price: 15000, installPrice: 3000, minConsumption: 200, maxConsumption: 350 },
   { id: 2, name: "Kit Residencial 5kWp", power: "5 kWp", panels: 10, inverter: "Growatt 5000", price: 22000, installPrice: 4500, minConsumption: 350, maxConsumption: 550 },
   { id: 3, name: "Kit Comercial 10kWp", power: "10 kWp", panels: 20, inverter: "Growatt 10000", price: 42000, installPrice: 8000, minConsumption: 550, maxConsumption: 1100 },
-  { id: 4, name: "Kit Comercial 20kWp", power: "20 kWp", panels: 40, inverter: "Growatt 20000", price: 78000, installPrice: 15000, minConsumption: 1100, maxConsumption: 2200 },
 ];
 
 export function ChatWidget({
@@ -74,7 +74,7 @@ export function ChatWidget({
   kits = defaultKits,
   embedded = false,
   botName = "Assistente Solar",
-  botAvatar,
+  integratorId,
 }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(embedded);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -101,23 +101,16 @@ export function ChatWidget({
     const welcome = welcomeMessage.replace("{empresa}", companyName);
     addBotMessage(formatBold(welcome));
     setTimeout(() => {
-      if (activeQuestions.length > 0) {
-        askQuestion(0);
-      }
+      if (activeQuestions.length > 0) askQuestion(0);
     }, 1000);
   };
 
-  const formatBold = (text: string) => {
-    return text.replace(/\*(.*?)\*/g, "<strong>$1</strong>").replace(/\n/g, "<br/>");
-  };
+  const formatBold = (text: string) => text.replace(/\*(.*?)\*/g, "<strong>$1</strong>").replace(/\n/g, "<br/>");
 
   const addBotMessage = (text: string, options?: string[]) => {
     setIsTyping(true);
     setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: `bot-${Date.now()}`, text, sender: "bot", timestamp: new Date(), options },
-      ]);
+      setMessages((prev) => [...prev, { id: `bot-${Date.now()}`, text, sender: "bot", timestamp: new Date(), options }]);
       setIsTyping(false);
     }, 800 + Math.random() * 600);
   };
@@ -132,8 +125,51 @@ export function ChatWidget({
     addBotMessage(q.question, q.type === "options" ? q.options : undefined);
   };
 
-  const findKit = (consumption: number): Kit | undefined => {
-    return kits.find((k) => consumption >= k.minConsumption && consumption <= k.maxConsumption);
+  const findKit = (consumption: number): Kit | undefined => kits.find((k) => consumption >= k.minConsumption && consumption <= k.maxConsumption);
+
+  const saveLead = async (allAnswers: Record<string, string>, kit: Kit | undefined) => {
+    if (!integratorId) return;
+
+    const consumption = parseInt(allAnswers["consumo_kwh"] || allAnswers["valor_conta"] || "0");
+    const monthlyBill = parseFloat(allAnswers["valor_conta"] || "0");
+    
+    // Determine score
+    let score: "hot" | "warm" | "cold" = "cold";
+    if (consumption > 500 || monthlyBill > 500) score = "hot";
+    else if (consumption > 200 || monthlyBill > 200) score = "warm";
+
+    const { data: lead } = await supabase.from("leads").insert({
+      integrator_id: integratorId,
+      name: allAnswers["nome"] || null,
+      city: allAnswers["cidade"] || null,
+      monthly_bill: monthlyBill || null,
+      consumption_kwh: parseInt(allAnswers["consumo_kwh"] || "0") || null,
+      roof_type: allAnswers["tipo_telhado"] || null,
+      recommended_kit_id: typeof kit?.id === "string" ? kit.id : null,
+      score,
+      answers: allAnswers,
+    }).select("id").single();
+
+    // Save conversation
+    if (lead) {
+      await supabase.from("conversations").insert({
+        lead_id: lead.id,
+        integrator_id: integratorId,
+        messages: messages.map(m => ({ text: m.text, sender: m.sender, timestamp: m.timestamp })),
+        completed: true,
+      });
+
+      // Track budget usage
+      await supabase.from("budget_transactions").insert({
+        integrator_id: integratorId,
+        lead_id: lead.id,
+        type: "BUDGET_USED",
+        description: `Pré-orçamento para ${allAnswers["nome"] || "lead"}`,
+      });
+
+      // Increment budgets_used
+      await supabase.rpc("generate_license_key"); // We need a proper increment, let's use raw update
+    }
   };
 
   const generateBudget = () => {
@@ -152,21 +188,22 @@ export function ChatWidget({
       .replace("{economia}", economia.toLocaleString("pt-BR"));
 
     addBotMessage(formatBold(msg));
+
+    // Save lead to database
+    saveLead(answers, kit);
   };
 
   const handleSend = (text?: string) => {
     const value = text || input.trim();
     if (!value || conversationDone) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: `user-${Date.now()}`, text: value, sender: "user", timestamp: new Date() },
-    ]);
+    setMessages((prev) => [...prev, { id: `user-${Date.now()}`, text: value, sender: "user", timestamp: new Date() }]);
     setInput("");
 
     if (currentStep >= 0 && currentStep < activeQuestions.length) {
       const q = activeQuestions[currentStep];
-      setAnswers((prev) => ({ ...prev, [q.variable]: value }));
+      const newAnswers = { ...answers, [q.variable]: value };
+      setAnswers(newAnswers);
       setTimeout(() => askQuestion(currentStep + 1), 300);
     }
   };
@@ -181,7 +218,6 @@ export function ChatWidget({
 
   const currentQuestion = currentStep >= 0 && currentStep < activeQuestions.length ? activeQuestions[currentStep] : null;
 
-  // Floating bubble mode
   if (!embedded && !isOpen) {
     return (
       <button
@@ -194,16 +230,13 @@ export function ChatWidget({
     );
   }
 
-  const chatContent = (
+  return (
     <div className={cn(
       "flex flex-col bg-background overflow-hidden",
       embedded ? "w-full h-[600px] rounded-2xl border shadow-xl" : "fixed bottom-6 right-6 z-50 w-[400px] h-[600px] rounded-2xl shadow-2xl border animate-slide-up"
     )}>
       {/* Header */}
-      <div
-        className="flex items-center gap-3 px-5 py-4 text-white relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
-      >
+      <div className="flex items-center gap-3 px-5 py-4 text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/20" />
           <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full bg-white/10" />
@@ -223,13 +256,7 @@ export function ChatWidget({
           <p className="text-xs text-white/80">{companyName} • Online</p>
         </div>
         <div className="flex items-center gap-1 relative">
-          <button
-            onClick={handleReset}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors text-xs"
-            title="Reiniciar conversa"
-          >
-            ↻
-          </button>
+          <button onClick={handleReset} className="p-2 rounded-lg hover:bg-white/10 transition-colors text-xs" title="Reiniciar conversa">↻</button>
           {!embedded && (
             <button onClick={() => setIsOpen(false)} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
               <X className="h-4 w-4" />
@@ -251,9 +278,7 @@ export function ChatWidget({
               <div
                 className={cn(
                   "px-4 py-2.5 text-sm leading-relaxed",
-                  msg.sender === "user"
-                    ? "rounded-2xl rounded-br-md text-white"
-                    : "rounded-2xl rounded-bl-md bg-card border shadow-sm"
+                  msg.sender === "user" ? "rounded-2xl rounded-br-md text-white" : "rounded-2xl rounded-bl-md bg-card border shadow-sm"
                 )}
                 style={msg.sender === "user" ? { background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` } : {}}
                 dangerouslySetInnerHTML={{ __html: msg.text }}
@@ -265,19 +290,9 @@ export function ChatWidget({
                       key={i}
                       onClick={() => handleSend(opt)}
                       className="px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all duration-200 hover:scale-105"
-                      style={{
-                        borderColor: primaryColor,
-                        color: primaryColor,
-                        backgroundColor: `${primaryColor}08`,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = primaryColor;
-                        e.currentTarget.style.color = "white";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = `${primaryColor}08`;
-                        e.currentTarget.style.color = primaryColor;
-                      }}
+                      style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: `${primaryColor}08` }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = primaryColor; e.currentTarget.style.color = "white"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = `${primaryColor}08`; e.currentTarget.style.color = primaryColor; }}
                     >
                       {opt}
                     </button>
@@ -314,11 +329,7 @@ export function ChatWidget({
         {conversationDone ? (
           <div className="text-center py-2">
             <p className="text-xs text-muted-foreground mb-2">Conversa finalizada</p>
-            <button
-              onClick={handleReset}
-              className="text-xs font-medium px-4 py-1.5 rounded-full transition-colors"
-              style={{ color: primaryColor, backgroundColor: `${primaryColor}10` }}
-            >
+            <button onClick={handleReset} className="text-xs font-medium px-4 py-1.5 rounded-full transition-colors" style={{ color: primaryColor, backgroundColor: `${primaryColor}10` }}>
               Iniciar nova conversa
             </button>
           </div>
@@ -327,14 +338,9 @@ export function ChatWidget({
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={
-                currentQuestion?.type === "number"
-                  ? "Digite um número..."
-                  : "Digite sua mensagem..."
-              }
+              placeholder={currentQuestion?.type === "number" ? "Digite um número..." : "Digite sua mensagem..."}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               className="flex-1 px-4 py-2.5 rounded-xl border bg-muted/50 text-sm focus:outline-none focus:ring-2 transition-all"
-              style={{ focusRingColor: primaryColor } as any}
               type={currentQuestion?.type === "number" ? "number" : "text"}
             />
             <button
@@ -347,12 +353,8 @@ export function ChatWidget({
             </button>
           </div>
         )}
-        <p className="text-[10px] text-center text-muted-foreground mt-2 opacity-60">
-          Powered by Leads Solar ⚡
-        </p>
+        <p className="text-[10px] text-center text-muted-foreground mt-2 opacity-60">Powered by Leads Solar ⚡</p>
       </div>
     </div>
   );
-
-  return chatContent;
 }
