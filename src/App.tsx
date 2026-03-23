@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Public Pages
 import Index from "./pages/Index";
@@ -41,41 +43,43 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        <AuthProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Onboarding Routes */}
-          <Route path="/onboarding/welcome" element={<OnboardingWelcome />} />
-          <Route path="/onboarding/company" element={<OnboardingCompany />} />
-          <Route path="/onboarding/whatsapp" element={<OnboardingWhatsApp />} />
-          <Route path="/onboarding/branding" element={<OnboardingBranding />} />
-          <Route path="/onboarding/plan" element={<OnboardingPlan />} />
+            {/* Onboarding Routes (requires auth) */}
+            <Route path="/onboarding/welcome" element={<ProtectedRoute><OnboardingWelcome /></ProtectedRoute>} />
+            <Route path="/onboarding/company" element={<ProtectedRoute><OnboardingCompany /></ProtectedRoute>} />
+            <Route path="/onboarding/whatsapp" element={<ProtectedRoute><OnboardingWhatsApp /></ProtectedRoute>} />
+            <Route path="/onboarding/branding" element={<ProtectedRoute><OnboardingBranding /></ProtectedRoute>} />
+            <Route path="/onboarding/plan" element={<ProtectedRoute><OnboardingPlan /></ProtectedRoute>} />
 
-          {/* Integrator Dashboard Routes */}
-          <Route path="/dashboard/home" element={<DashboardHome />} />
-          <Route path="/dashboard/leads" element={<DashboardLeads />} />
-          <Route path="/dashboard/kits" element={<DashboardKits />} />
-          <Route path="/dashboard/chatbot" element={<DashboardChatbot />} />
-          <Route path="/dashboard/flows" element={<DashboardFlows />} />
-          <Route path="/dashboard/account" element={<DashboardHome />} />
-          <Route path="/dashboard/settings" element={<DashboardSettings />} />
+            {/* Integrator Dashboard Routes */}
+            <Route path="/dashboard/home" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />
+            <Route path="/dashboard/leads" element={<ProtectedRoute><DashboardLeads /></ProtectedRoute>} />
+            <Route path="/dashboard/kits" element={<ProtectedRoute><DashboardKits /></ProtectedRoute>} />
+            <Route path="/dashboard/chatbot" element={<ProtectedRoute><DashboardChatbot /></ProtectedRoute>} />
+            <Route path="/dashboard/flows" element={<ProtectedRoute><DashboardFlows /></ProtectedRoute>} />
+            <Route path="/dashboard/account" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />
+            <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettings /></ProtectedRoute>} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/integrators" element={<AdminIntegrators />} />
-          <Route path="/admin/licenses" element={<AdminLicenses />} />
-          <Route path="/admin/financeiro" element={<AdminDashboard />} />
-          <Route path="/admin/settings" element={<AdminDashboard />} />
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/integrators" element={<ProtectedRoute requiredRole="admin"><AdminIntegrators /></ProtectedRoute>} />
+            <Route path="/admin/licenses" element={<ProtectedRoute requiredRole="admin"><AdminLicenses /></ProtectedRoute>} />
+            <Route path="/admin/financeiro" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
 
-          {/* White-Label Public Pages */}
-          <Route path="/s/:slug" element={<WhiteLabelPage />} />
+            {/* White-Label Public Pages */}
+            <Route path="/s/:slug" element={<WhiteLabelPage />} />
 
-          {/* Catch-all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
