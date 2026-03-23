@@ -152,23 +152,19 @@ export function ChatWidget({
 
     // Save conversation
     if (lead) {
-      await supabase.from("conversations").insert({
+      await supabase.from("conversations").insert([{
         lead_id: lead.id,
         integrator_id: integratorId,
-        messages: messages.map(m => ({ text: m.text, sender: m.sender, timestamp: m.timestamp })),
+        messages: messages.map(m => ({ text: m.text, sender: m.sender, timestamp: m.timestamp })) as unknown as import("@/integrations/supabase/types").Json,
         completed: true,
-      });
+      }]);
 
-      // Track budget usage
-      await supabase.from("budget_transactions").insert({
+      await supabase.from("budget_transactions").insert([{
         integrator_id: integratorId,
         lead_id: lead.id,
         type: "BUDGET_USED",
         description: `Pré-orçamento para ${allAnswers["nome"] || "lead"}`,
-      });
-
-      // Increment budgets_used
-      await supabase.rpc("generate_license_key"); // We need a proper increment, let's use raw update
+      }]);
     }
   };
 
