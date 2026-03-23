@@ -14,16 +14,490 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      budget_transactions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          integrator_id: string
+          lead_id: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          integrator_id: string
+          lead_id?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          integrator_id?: string
+          lead_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_transactions_integrator_id_fkey"
+            columns: ["integrator_id"]
+            isOneToOne: false
+            referencedRelation: "integrators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_transactions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          id: string
+          integrator_id: string
+          lead_id: string
+          messages: Json | null
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          integrator_id: string
+          lead_id: string
+          messages?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          integrator_id?: string
+          lead_id?: string
+          messages?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_integrator_id_fkey"
+            columns: ["integrator_id"]
+            isOneToOne: false
+            referencedRelation: "integrators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flow_questions: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          id: string
+          integrator_id: string
+          options: Json | null
+          question_order: number
+          question_text: string
+          question_type: string
+          required: boolean | null
+          variable: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          integrator_id: string
+          options?: Json | null
+          question_order: number
+          question_text: string
+          question_type?: string
+          required?: boolean | null
+          variable: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          integrator_id?: string
+          options?: Json | null
+          question_order?: number
+          question_text?: string
+          question_type?: string
+          required?: boolean | null
+          variable?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_questions_integrator_id_fkey"
+            columns: ["integrator_id"]
+            isOneToOne: false
+            referencedRelation: "integrators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrators: {
+        Row: {
+          accent_color: string | null
+          active: boolean | null
+          address: string | null
+          bot_name: string | null
+          budget_reset_date: string | null
+          budgets_used: number | null
+          closing_message: string | null
+          company_name: string
+          created_at: string
+          cta_text: string | null
+          email: string | null
+          favicon_url: string | null
+          features: Json | null
+          footer_text: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          license_id: string | null
+          logo_url: string | null
+          monthly_budget_limit: number | null
+          phone: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string
+          subscription_plan:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          subscription_status:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          testimonials: Json | null
+          trial_ends_at: string | null
+          updated_at: string
+          user_id: string
+          welcome_message: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          active?: boolean | null
+          address?: string | null
+          bot_name?: string | null
+          budget_reset_date?: string | null
+          budgets_used?: number | null
+          closing_message?: string | null
+          company_name: string
+          created_at?: string
+          cta_text?: string | null
+          email?: string | null
+          favicon_url?: string | null
+          features?: Json | null
+          footer_text?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          license_id?: string | null
+          logo_url?: string | null
+          monthly_budget_limit?: number | null
+          phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug: string
+          subscription_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          testimonials?: Json | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id: string
+          welcome_message?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          active?: boolean | null
+          address?: string | null
+          bot_name?: string | null
+          budget_reset_date?: string | null
+          budgets_used?: number | null
+          closing_message?: string | null
+          company_name?: string
+          created_at?: string
+          cta_text?: string | null
+          email?: string | null
+          favicon_url?: string | null
+          features?: Json | null
+          footer_text?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          license_id?: string | null
+          logo_url?: string | null
+          monthly_budget_limit?: number | null
+          phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string
+          subscription_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          testimonials?: Json | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integrators_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "licenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kits: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          id: string
+          install_price: number | null
+          integrator_id: string
+          inverter: string | null
+          max_consumption: number
+          min_consumption: number
+          name: string
+          panels: number
+          power: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          install_price?: number | null
+          integrator_id: string
+          inverter?: string | null
+          max_consumption?: number
+          min_consumption?: number
+          name: string
+          panels: number
+          power: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          install_price?: number | null
+          integrator_id?: string
+          inverter?: string | null
+          max_consumption?: number
+          min_consumption?: number
+          name?: string
+          panels?: number
+          power?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kits_integrator_id_fkey"
+            columns: ["integrator_id"]
+            isOneToOne: false
+            referencedRelation: "integrators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          answers: Json | null
+          city: string | null
+          consumption_kwh: number | null
+          converted: boolean | null
+          created_at: string
+          email: string | null
+          id: string
+          integrator_id: string
+          monthly_bill: number | null
+          name: string | null
+          phone: string | null
+          recommended_kit_id: string | null
+          roof_type: string | null
+          score: Database["public"]["Enums"]["lead_score"] | null
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json | null
+          city?: string | null
+          consumption_kwh?: number | null
+          converted?: boolean | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          integrator_id: string
+          monthly_bill?: number | null
+          name?: string | null
+          phone?: string | null
+          recommended_kit_id?: string | null
+          roof_type?: string | null
+          score?: Database["public"]["Enums"]["lead_score"] | null
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json | null
+          city?: string | null
+          consumption_kwh?: number | null
+          converted?: boolean | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          integrator_id?: string
+          monthly_bill?: number | null
+          name?: string | null
+          phone?: string | null
+          recommended_kit_id?: string | null
+          roof_type?: string | null
+          score?: Database["public"]["Enums"]["lead_score"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_integrator_id_fkey"
+            columns: ["integrator_id"]
+            isOneToOne: false
+            referencedRelation: "integrators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_recommended_kit_id_fkey"
+            columns: ["recommended_kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      licenses: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          license_key: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status: Database["public"]["Enums"]["license_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          license_key: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: Database["public"]["Enums"]["license_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          license_key?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: Database["public"]["Enums"]["license_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_license_key: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "integrator"
+      lead_score: "hot" | "warm" | "cold"
+      license_status: "active" | "expired" | "revoked" | "trial"
+      subscription_plan: "basic" | "pro"
+      subscription_status:
+        | "trial"
+        | "active"
+        | "past_due"
+        | "canceled"
+        | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +624,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "integrator"],
+      lead_score: ["hot", "warm", "cold"],
+      license_status: ["active", "expired", "revoked", "trial"],
+      subscription_plan: ["basic", "pro"],
+      subscription_status: [
+        "trial",
+        "active",
+        "past_due",
+        "canceled",
+        "expired",
+      ],
+    },
   },
 } as const
