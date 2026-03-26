@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Logo } from "@/components/layout/Logo";
 import { ArrowLeft, ArrowRight, Palette, Upload } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/use-toast";
 
 const colorPresets = [
   { name: "Solar", primary: "#F59E0B", secondary: "#10B981" },
@@ -16,10 +19,65 @@ const colorPresets = [
 
 export default function OnboardingBranding() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedPreset, setSelectedPreset] = useState(0);
   const [welcomeMessage, setWelcomeMessage] = useState(
     "Olá! 👋 Bem-vindo à {empresa}. Sou seu assistente virtual e vou te ajudar a receber um pré-orçamento de energia solar. Vamos começar?"
   );
+  const [logoUrl, setLogoUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const currentPreset = colorPresets[selectedPreset];
+  const primaryColor = currentPreset.primary;
+  const secondaryColor = currentPreset.secondary;
+  const accentColor = currentPreset.primary; // Using primary as accent for now
+
+  const handleContinue = async () => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from("integrators")
+        .update({
+          primary_color: primaryColor,
+          secondary_color: secondaryColor,
+          accent_color: accentColor,
+          logo_url: logoUrl || null,
+        })
+        .eq("user_id", user.id);
+
+      if (error) {
+        toast({
+          title: "Erro ao salvar personalização",
+          description: error.message || "Tente novamente.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Personalização salva com sucesso!",
+      });
+      navigate("/onboarding/plan");
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar. Tente novamente.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-hero flex flex-col">
@@ -121,9 +179,10 @@ export default function OnboardingBranding() {
               variant="solar"
               size="lg"
               className="flex-1"
-              onClick={() => navigate("/onboarding/plan")}
+              onClick={handleContinue}
+              disabled={isLoading}
             >
-              Continuar
+              {isLoading ? "Salvando..." : "Continuar"}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>

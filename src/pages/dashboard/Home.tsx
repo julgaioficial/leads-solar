@@ -6,9 +6,17 @@ import {
   MessageSquare,
   ArrowUpRight,
   ArrowDownRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Copy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { buildWhiteLabelUrl } from "@/lib/slug";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const stats = [
   {
@@ -56,6 +64,115 @@ const statusColors = {
 };
 
 export default function DashboardHome() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [integrator, setIntegrator] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [statsData, setStatsData] = useState(stats);
+  const [recentLeadsData, setRecentLeadsData] = useState(recentLeads);
+
+  useEffect(() => {
+    const fetchIntegrator = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data: integratorData, error: integratorError } = await supabase
+          .from('integrators')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (integratorError) {
+          console.error('Error fetching integrator:', integratorError);
+        } else {
+          setIntegrator(integratorData);
+        }
+
+        // Fetch real stats from database
+        if (integratorData?.id) {
+          const integratorId = integratorData.id;
+          
+          // Fetch leads count for today
+          const today = new Date().toISOString().split('T')[0];
+          const { data: leadsToday, error: leadsError } = await supabase
+            .from('leads')
+            .select('*', { count: 'exact' })
+            .eq('integrator_id', integratorId)
+            .gte('created_at', today);
+
+          if (!leadsError && leadsToday) {
+            setStatsData(prev => ({
+              ...prev,
+              0: { ...prev[0], value: leadsToday.length.toString() }
+            }));
+          }
+
+          // Fetch conversion rate
+          const { data: allLeads, error: allLeadsError } = await supabase
+            .from('leads')
+            .select('converted')
+            .eq('integrator_id', integratorId);
+
+          if (!allLeadsError && allLeads) {
+            const convertedCount = allLeads.filter(l => l.converted).length;
+            const conversionRate = allLeads.length > 0 
+              ? ((convertedCount / allLeads.length) * 100).toFixed(0) 
+              : '0';
+            setStatsData(prev => ({
+              ...prev,
+              1: { ...prev[1], value: `${conversionRate}%` }
+            }));
+          }
+
+          // Fetch remaining budgets
+          const { data: transactions, error: transactionsError } = await supabase
+            .from('budget_transactions')
+            .select('*')
+            .eq('integrator_id', integratorId);
+
+          if (!transactionsError && transactions && integratorData.subscription_plan) {
+            const maxBudgets = integratorData.subscription_plan === 'PRO' ? 250 : 100;
+            const usedBudgets = transactions.length;
+            setStatsData(prev => ({
+              ...prev,
+              2: { ...prev[2], value: `${maxBudgets - usedBudgets}/${maxBudgets}` }
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIntegrator();
+  }, [user?.id]);
+
+  const handleCopyLink = async () => {
+    if (!integrator?.slug) return;
+
+    const link = buildWhiteLabelUrl(integrator.slug);
+    try {
+      await navigator.clipboard.writeText(link);
+      toast({
+        title: "Link copiado!",
+        description: "O link foi copiado para a área de transferência.",
+      });
+    } catch (err) {
+      console.error('Error copying to clipboard:', err);
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar o link.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -67,8 +184,60 @@ export default function DashboardHome() {
               Aqui está o resumo do seu dia.
             </p>
           </div>
-          <Button variant="solar">+ Novo Kit</Button>
+          <Button variant="solar" onClick={() => navigate('/dashboard/kits')}>+ Novo Kit</Button>
         </div>
+
+        {/* White-Label Link Card */}
+        {!loading && (
+          <Card className="card-solar p-6">
+            {integrator && integrator.slug ? (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Seu Link Exclusivo</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Compartilhe este link com seus clientes para acessar seu site white-label
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 p-3 bg-muted rounded-lg">
+                    <a 
+                      href={buildWhiteLabelUrl(integrator.slug)} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm font-mono break-all text-primary hover:underline"
+                    >
+                      {buildWhiteLabelUrl(integrator.slug)}
+                    </a>
+                  </div>
+                  <Button
+                    variant="solar"
+                    size="sm"
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-2"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copiar Link
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Complete seu cadastro</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Complete seu cadastro para ativar seu site
+                  </p>
+                </div>
+                <Button
+                  variant="solar"
+                  onClick={() => navigate('/onboarding/company')}
+                >
+                  Ir para Onboarding
+                </Button>
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -148,15 +317,27 @@ export default function DashboardHome() {
             <div className="card-solar">
               <h3 className="text-lg font-semibold mb-4">Ações Rápidas</h3>
               <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/dashboard/leads')}
+                >
                   <Users className="h-4 w-4 mr-2" />
                   Ver Todos os Leads
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/dashboard/flows')}
+                >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Editar Fluxo de Conversa
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/dashboard/kits')}
+                >
                   <CreditCard className="h-4 w-4 mr-2" />
                   Ver Orçamentos
                 </Button>

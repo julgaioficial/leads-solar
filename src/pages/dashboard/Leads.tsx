@@ -119,7 +119,7 @@ export default function DashboardLeads() {
               Gerencie e filtre seus leads por temperatura
             </p>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => window.open('https://www.google.com', '_blank')}>
             <Download className="h-4 w-4 mr-2" />
             Exportar CSV
           </Button>
