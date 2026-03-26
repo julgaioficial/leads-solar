@@ -6,9 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Logo } from "@/components/layout/Logo";
 import { ArrowLeft, ArrowRight, Building2 } from "lucide-react";
+import { generateSlug, ensureUniqueSlug } from "@/lib/slug";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function OnboardingCompany() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     companyName: "",
     cnpj: "",
@@ -27,9 +34,48 @@ export default function OnboardingCompany() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/onboarding/whatsapp");
+    
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Generate base slug and ensure uniqueness
+      const baseSlug = generateSlug(formData.companyName);
+      const slug = await ensureUniqueSlug(baseSlug, supabase);
+
+      // Insert integrator record
+      const { error } = await supabase.from("integrators").insert({
+        company_name: formData.companyName,
+        slug,
+        user_id: user.id,
+        active: true,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Navigate to next step on success
+      navigate("/onboarding/whatsapp");
+    } catch (error) {
+      console.error("Error saving company data:", error);
+      toast({
+        title: "Erro ao salvar dados da empresa",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -65,6 +111,11 @@ export default function OnboardingCompany() {
                   onChange={handleChange}
                   required
                 />
+                {formData.companyName && (
+                  <div className="text-sm text-muted-foreground pt-2">
+                    Seu domínio: <span className="font-medium text-foreground">seudominio.com/s/{generateSlug(formData.companyName)}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -132,13 +183,20 @@ export default function OnboardingCompany() {
                 variant="outline"
                 size="lg"
                 onClick={() => navigate("/onboarding/welcome")}
+                disabled={isLoading}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar
               </Button>
-              <Button type="submit" variant="solar" size="lg" className="flex-1">
-                Continuar
-                <ArrowRight className="h-4 w-4 ml-2" />
+              <Button 
+                type="submit" 
+                variant="solar" 
+                size="lg" 
+                className="flex-1"
+                disabled={isLoading}
+              >
+                {isLoading ? "Salvando..." : "Continuar"}
+                {!isLoading && <ArrowRight className="h-4 w-4 ml-2" />}
               </Button>
             </div>
           </form>

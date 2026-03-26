@@ -1,8 +1,17 @@
 import { useParams } from "react-router-dom";
 import { ChatWidget } from "@/components/chatbot/ChatWidget";
-import { Sun, Shield, Zap, Phone, Mail, CheckCircle, ArrowRight, Star } from "lucide-react";
+import { Sun, Shield, Zap, Phone, Mail, CheckCircle, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/landing/Navbar";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { CTA } from "@/components/landing/CTA";
+import { Footer } from "@/components/landing/Footer";
+
+type ErrorType = 'not_found' | 'inactive' | 'network_error' | null;
 
 interface IntegratorData {
   id: string;
@@ -31,7 +40,7 @@ export default function WhiteLabelPage() {
   const { slug } = useParams<{ slug: string }>();
   const [data, setData] = useState<IntegratorData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [errorType, setErrorType] = useState<ErrorType>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -43,11 +52,22 @@ export default function WhiteLabelPage() {
       .from("integrators")
       .select("*")
       .eq("slug", slug)
-      .eq("active", true)
       .maybeSingle();
 
-    if (intErr || !integrator) {
-      setError(true);
+    if (intErr) {
+      setErrorType('network_error');
+      setLoading(false);
+      return;
+    }
+
+    if (!integrator) {
+      setErrorType('not_found');
+      setLoading(false);
+      return;
+    }
+
+    if (!integrator.active) {
+      setErrorType('inactive');
       setLoading(false);
       return;
     }
@@ -122,17 +142,67 @@ export default function WhiteLabelPage() {
     );
   }
 
-  if (error || !data) {
+  if (errorType === 'not_found') {
+    // When slug not found, show the default landing page (Index.tsx)
+    // Import and render the default landing page components
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Página não disponível.</p>
+      <div className="min-h-screen">
+        <Navbar />
+        <Hero />
+        <Features />
+        <HowItWorks />
+        <CTA />
+        <Footer />
       </div>
     );
   }
 
-  const scrollToChat = () => {
-    document.getElementById("chatbot-section")?.scrollIntoView({ behavior: "smooth" });
-  };
+  if (errorType === 'inactive') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+        <div className="max-w-md w-full mx-4 text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
+              <AlertCircle className="h-8 w-8 text-yellow-600" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">Site temporariamente indisponível</h1>
+            <p className="text-muted-foreground">
+              Este site está temporariamente indisponível. Por favor, entre em contato com o integrador para mais informações.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorType === 'network_error') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+        <div className="max-w-md w-full mx-4 text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
+              <AlertCircle className="h-8 w-8 text-orange-600" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">Erro ao carregar a página</h1>
+            <p className="text-muted-foreground">
+              Ocorreu um erro ao carregar a página. Verifique sua conexão e tente novamente.
+            </p>
+          </div>
+          <Button onClick={() => loadIntegrator(slug!)} className="w-full">
+            Tentar novamente
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -151,9 +221,6 @@ export default function WhiteLabelPage() {
               </div>
             )}
           </div>
-          <button onClick={scrollToChat} className="px-5 py-2 rounded-full text-white text-sm font-semibold transition-all hover:scale-105 shadow-lg" style={{ background: `linear-gradient(135deg, ${data.primaryColor}, ${data.secondaryColor})` }}>
-            {data.ctaText}
-          </button>
         </div>
       </nav>
 
@@ -169,10 +236,6 @@ export default function WhiteLabelPage() {
               </div>
               <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">{data.heroTitle}</h1>
               <p className="text-lg text-muted-foreground leading-relaxed">{data.heroSubtitle}</p>
-              <button onClick={scrollToChat} className="px-8 py-4 rounded-xl text-white font-bold text-lg transition-all hover:scale-105 shadow-xl flex items-center gap-2" style={{ background: `linear-gradient(135deg, ${data.primaryColor}, ${data.secondaryColor})` }}>
-                {data.ctaText}
-                <ArrowRight className="h-5 w-5" />
-              </button>
               <div className="flex items-center gap-6 pt-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Shield className="h-4 w-4" style={{ color: data.secondaryColor }} />
@@ -183,21 +246,6 @@ export default function WhiteLabelPage() {
                   Resultado em minutos
                 </div>
               </div>
-            </div>
-            <div className="hidden lg:block">
-              <ChatWidget
-                companyName={data.companyName}
-                primaryColor={data.primaryColor}
-                secondaryColor={data.secondaryColor}
-                logoUrl={data.logoUrl}
-                welcomeMessage={data.welcomeMessage}
-                closingMessage={data.closingMessage}
-                questions={data.questions}
-                kits={data.kits}
-                embedded
-                botName={data.botName}
-                integratorId={data.id}
-              />
             </div>
           </div>
         </div>
@@ -220,47 +268,6 @@ export default function WhiteLabelPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">O que nossos clientes dizem</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {data.testimonials.map((t, i) => (
-              <div key={i} className="bg-card rounded-2xl p-6 border shadow-sm">
-                <div className="flex gap-1 mb-3">
-                  {Array.from({ length: t.rating }).map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-current" style={{ color: data.accentColor }} />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground mb-4">"{t.text}"</p>
-                <p className="font-semibold text-sm">{t.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Chatbot Section */}
-      <section id="chatbot-section" className="py-16 bg-muted/30">
-        <div className="max-w-2xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-3">Faça sua simulação agora</h2>
-          <p className="text-center text-muted-foreground mb-8">Responda algumas perguntas e receba seu orçamento personalizado</p>
-          <ChatWidget
-            companyName={data.companyName}
-            primaryColor={data.primaryColor}
-            secondaryColor={data.secondaryColor}
-            logoUrl={data.logoUrl}
-            welcomeMessage={data.welcomeMessage}
-            closingMessage={data.closingMessage}
-            questions={data.questions}
-            kits={data.kits}
-            embedded
-            botName={data.botName}
-            integratorId={data.id}
-          />
         </div>
       </section>
 
@@ -300,21 +307,19 @@ export default function WhiteLabelPage() {
         </div>
       </footer>
 
-      {/* Floating chat for mobile */}
-      <div className="lg:hidden">
-        <ChatWidget
-          companyName={data.companyName}
-          primaryColor={data.primaryColor}
-          secondaryColor={data.secondaryColor}
-          logoUrl={data.logoUrl}
-          welcomeMessage={data.welcomeMessage}
-          closingMessage={data.closingMessage}
-          questions={data.questions}
-          kits={data.kits}
-          botName={data.botName}
-          integratorId={data.id}
-        />
-      </div>
+      {/* Floating chat for all screens */}
+      <ChatWidget
+        companyName={data.companyName}
+        primaryColor={data.primaryColor}
+        secondaryColor={data.secondaryColor}
+        logoUrl={data.logoUrl}
+        welcomeMessage={data.welcomeMessage}
+        closingMessage={data.closingMessage}
+        questions={data.questions}
+        kits={data.kits}
+        botName={data.botName}
+        integratorId={data.id}
+      />
     </div>
   );
 }
