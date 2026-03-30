@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/Logo";
 import { ArrowLeft, Check, CreditCard, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { calcTrialEndsAt } from "@/lib/slug";
 
 const plans = [
   {
@@ -33,18 +36,57 @@ const plans = [
 export default function OnboardingPlan() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState("pro");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      const trialEndsAt = calcTrialEndsAt(Date.now());
+
+      const { error } = await supabase
+        .from("integrators")
+        .update({
+          subscription_plan: selectedPlan,
+          subscription_status: "trial",
+          trial_ends_at: trialEndsAt,
+        })
+        .eq("user_id", user.id);
+
+      if (error) {
+        toast({
+          title: "Erro ao ativar trial",
+          description: "Não foi possível salvar seu plano. Tente novamente.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       toast({
         title: "Trial ativado! 🎉",
         description: "Você tem 7 dias grátis para testar. Aproveite!",
       });
       navigate("/dashboard/home");
-    }, 1500);
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   };
 
   return (

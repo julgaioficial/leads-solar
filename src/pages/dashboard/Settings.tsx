@@ -23,8 +23,10 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Feature {
   title: string;
@@ -39,6 +41,7 @@ interface Testimonial {
 
 export default function DashboardSettings() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isActive] = useState(true); // Simulates license activation
 
   const [settings, setSettings] = useState({
@@ -73,35 +76,118 @@ export default function DashboardSettings() {
     { name: "Ana P.", text: "Atendimento excelente e instalação rápida.", rating: 5 },
   ]);
 
+  const [isSaving, setIsSaving] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const faviconInputRef = useRef<HTMLInputElement>(null);
+
   const pageUrl = `${window.location.origin}/s/${settings.slug}`;
 
   const handleChange = (field: string, value: string) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    toast({ title: "Configurações salvas! ✅", description: "Sua página white-label foi atualizada." });
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', user.id);
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('logos')
+        .upload(`integrators/${user.id}/logo.${file.name.split('.').pop()}`, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(data.path);
+
+      setSettings((prev) => ({ ...prev, logoUrl: publicUrl }));
+      toast({ title: "Logo atualizada! ✅" });
+    } catch (err) {
+      console.error('Error uploading logo:', err);
+      toast({ title: "Erro ao upload da logo", variant: "destructive" });
+    }
+  };
+
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('favicons')
+        .upload(`integrators/${user.id}/favicon.${file.name.split('.').pop()}`, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('favicons')
+        .getPublicUrl(data.path);
+
+      setSettings((prev) => ({ ...prev, faviconUrl: publicUrl }));
+      toast({ title: "Favicon atualizado! ✅" });
+    } catch (err) {
+      console.error('Error uploading favicon:', err);
+      toast({ title: "Erro ao upload do favicon", variant: "destructive" });
+    }
+  };
+
+  const handleSave = async () => {
+    console.log('handleSave called');
+    if (!user?.id) {
+      toast({ title: "Erro", description: "Usuário não autenticado", variant: "destructive" });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('integrators')
+        .update({
+          company_name: settings.companyName,
+          primary_color: settings.primaryColor,
+          secondary_color: settings.secondaryColor,
+          accent_color: settings.accentColor,
+          logo_url: settings.logoUrl,
+          hero_title: settings.heroTitle,
+          hero_subtitle: settings.heroSubtitle,
+          cta_text: settings.ctaText,
+          footer_text: settings.footerText,
+          phone: settings.whatsappNumber,
+          email: settings.email,
+          bot_name: settings.botName,
+          welcome_message: settings.welcomeMessage,
+          closing_message: settings.closingMessage,
+          features: features,
+          testimonials: testimonials,
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({ title: "Configurações salvas! ✅", description: "Sua página white-label foi atualizada." });
+    } catch (err) {
+      console.error('Error saving settings:', err);
+      toast({ title: "Erro ao salvar", description: "Tente novamente mais tarde.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const copyLink = () => {
     navigator.clipboard.writeText(pageUrl);
     toast({ title: "Link copiado! 📋" });
   };
-
-  if (!isActive) {
-    return (
-      <DashboardLayout>
-        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-          <Lock className="h-16 w-16 text-muted-foreground" />
-          <h2 className="text-2xl font-bold">Página bloqueada</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Ative seu plano para desbloquear a personalização da sua página white-label e chatbot.
-          </p>
-          <Button variant="solar" size="lg">Ativar Plano</Button>
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   return (
     <DashboardLayout>
@@ -116,7 +202,7 @@ export default function DashboardSettings() {
               <ExternalLink className="h-4 w-4 mr-2" />
               Ver Página
             </Button>
-            <Button variant="solar" onClick={handleSave}>
+            <Button variant="solar" onClick={() => { console.log('Salvar button clicked'); handleSave(); }}>
               <Save className="h-4 w-4 mr-2" />
               Salvar
             </Button>
@@ -197,19 +283,40 @@ export default function DashboardSettings() {
               </div>
               <div className="grid sm:grid-cols-2 gap-6">
                 {[
-                  { label: "URL do Logo", field: "logoUrl", h: "h-32" },
-                  { label: "URL do Favicon", field: "faviconUrl", h: "h-32" },
-                ].map(({ label, field, h }) => (
+                  { label: "Logo da Empresa", field: "logoUrl", h: "h-32", inputRef: logoInputRef, onUpload: handleLogoUpload },
+                  { label: "Favicon", field: "faviconUrl", h: "h-32", inputRef: faviconInputRef, onUpload: handleFaviconUpload },
+                ].map(({ label, field, h, inputRef, onUpload }) => (
                   <div key={field} className="space-y-2">
                     <Label>{label}</Label>
-                    <Input value={(settings as any)[field]} onChange={(e) => handleChange(field, e.target.value)} placeholder="https://..." />
+                    <Input 
+                      value={(settings as any)[field]} 
+                      onChange={(e) => handleChange(field, e.target.value)} 
+                      placeholder="https://..." 
+                      readOnly
+                    />
+                    <input
+                      type="file"
+                      ref={inputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={onUpload}
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => inputRef?.current?.click()}
+                      className="w-full"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Fazer Upload
+                    </Button>
                     <div className={`w-full ${h} rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30`}>
                       {(settings as any)[field] ? (
                         <img src={(settings as any)[field]} alt="" className="max-h-24 max-w-full object-contain" />
                       ) : (
                         <div className="text-center">
                           <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">Cole a URL acima</p>
+                          <p className="text-sm text-muted-foreground">Clique para fazer upload</p>
                         </div>
                       )}
                     </div>
@@ -301,6 +408,116 @@ export default function DashboardSettings() {
                 ))}
               </div>
             </div>
+
+            {/* Editable Testimonials */}
+            <div className="card-solar">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Depoimentos</h3>
+                <Button variant="outline" size="sm" onClick={() => setTestimonials([...testimonials, { name: "", text: "", rating: 5 }])}>
+                  <Plus className="h-4 w-4 mr-1" /> Adicionar
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {testimonials.map((t, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-muted/50 space-y-3">
+                    <div className="flex gap-3 items-center">
+                      <Input
+                        placeholder="Nome do cliente"
+                        value={t.name}
+                        className="w-40"
+                        onChange={(e) => {
+                          const updated = [...testimonials];
+                          updated[i].name = e.target.value;
+                          setTestimonials(updated);
+                        }}
+                      />
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onClick={() => {
+                              const updated = [...testimonials];
+                              updated[i].rating = star;
+                              setTestimonials(updated);
+                            }}
+                          >
+                            <Star className={`h-4 w-4 ${star <= t.rating ? "fill-current text-yellow-500" : "text-muted-foreground/30"}`} />
+                          </button>
+                        ))}
+                      </div>
+                      <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setTestimonials(testimonials.filter((_, j) => j !== i))}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                    <Textarea
+                      placeholder="Depoimento do cliente..."
+                      value={t.text}
+                      rows={2}
+                      onChange={(e) => {
+                        const updated = [...testimonials];
+                        updated[i].text = e.target.value;
+                        setTestimonials(updated);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Editable Steps (How It Works) */}
+            <div className="card-solar">
+              <h3 className="text-lg font-semibold mb-4">Como Funciona (Passos)</h3>
+              <div className="space-y-4">
+                {[
+                  { step: "01", title: "Cliente envia mensagem", icon: "MessageSquare" },
+                  { step: "02", title: "IA coleta informações", icon: "Bot" },
+                  { step: "03", title: "Pré-orçamento enviado", icon: "FileText" },
+                  { step: "04", title: "Lead qualificado no dashboard", icon: "TrendingUp" },
+                ].map((step, i) => (
+                  <div key={i} className="flex gap-3 items-start p-3 rounded-lg bg-muted/50">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      {step.step}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        placeholder="Título do passo"
+                        value={step.title}
+                        onChange={(e) => {
+                          const updatedSteps = [
+                            { step: "01", title: "Cliente envia mensagem", icon: "MessageSquare" },
+                            { step: "02", title: "IA coleta informações", icon: "Bot" },
+                            { step: "03", title: "Pré-orçamento enviado", icon: "FileText" },
+                            { step: "04", title: "Lead qualificado no dashboard", icon: "TrendingUp" },
+                          ];
+                          updatedSteps[i].title = e.target.value;
+                          console.log("Updated steps:", updatedSteps);
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Editable Pricing Section (Hidden on white-label) */}
+            <div className="card-solar">
+              <h3 className="text-lg font-semibold mb-4">Seção de Planos (Ocultar no white-label)</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Título da Seção</Label>
+                  <Input value="Planos simples e transparentes" readOnly />
+                </div>
+                <div className="space-y-2">
+                  <Label>Subtítulo</Label>
+                  <Input value="Comece com 7 dias grátis. Cancele quando quiser. Sem taxas escondidas." readOnly />
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <p className="text-sm text-muted-foreground">
+                    💡 Limite mensal de pré-orçamentos gerados pelo chatbot • <span className="text-primary">ROI médio de 915%</span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Chat Tab */}
@@ -389,7 +606,7 @@ export default function DashboardSettings() {
           </TabsContent>
         </Tabs>
 
-        <Button variant="solar" size="lg" className="w-full" onClick={handleSave}>
+        <Button variant="solar" size="lg" className="w-full" onClick={() => { console.log('Salvar Todas as Configurações button clicked'); handleSave(); }}>
           <Save className="h-4 w-4 mr-2" />
           Salvar Todas as Configurações
         </Button>
