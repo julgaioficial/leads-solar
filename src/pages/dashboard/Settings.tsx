@@ -46,7 +46,7 @@ export default function DashboardSettings() {
         address: data.address || "", botName: data.bot_name || "Assistente Solar",
         welcomeMessage: data.welcome_message || "", closingMessage: data.closing_message || "",
       });
-      setFeatures(Array.isArray(data.features) ? data.features as Feature[] : [
+      setFeatures(Array.isArray(data.features) ? (data.features as unknown as Feature[]) : [
         { title: "Economia Real", description: "Reduza até 95% da sua conta de energia" },
         { title: "Retorno Garantido", description: "Investimento que se paga em 3-5 anos" },
         { title: "25 Anos de Garantia", description: "Painéis com garantia de fábrica" },
