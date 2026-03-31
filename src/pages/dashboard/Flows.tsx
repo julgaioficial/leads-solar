@@ -29,7 +29,7 @@ interface FlowQuestion {
 
 const typeIcons = { text: Type, number: Hash, options: ListOrdered, location: MapPin };
 const typeLabels = { text: "Texto livre", number: "Número", options: "Opções", location: "Localização" };
-const defaultNewQuestion = { question: "", type: "text" as const, variable: "", required: true, active: true, options: [] as string[] };
+const defaultNewQuestion: { question: string; type: "text" | "number" | "options" | "location"; variable: string; required: boolean; active: boolean; options: string[] } = { question: "", type: "text", variable: "", required: true, active: true, options: [] };
 
 export default function DashboardFlows() {
   const { toast } = useToast();

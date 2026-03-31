@@ -51,7 +51,7 @@ export default function DashboardSettings() {
         { title: "Retorno Garantido", description: "Investimento que se paga em 3-5 anos" },
         { title: "25 Anos de Garantia", description: "Painéis com garantia de fábrica" },
       ]);
-      setTestimonials(Array.isArray(data.testimonials) ? data.testimonials as Testimonial[] : []);
+      setTestimonials(Array.isArray(data.testimonials) ? (data.testimonials as unknown as Testimonial[]) : []);
     }
     setLoading(false);
   };
