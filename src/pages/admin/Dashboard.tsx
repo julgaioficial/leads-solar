@@ -1,72 +1,81 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Users,
   DollarSign,
   TrendingUp,
   Activity,
   ArrowUpRight,
-  ArrowDownRight,
+  Key,
+  Eye,
+  Ban,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const stats = [
-  {
-    label: "MRR Total",
-    value: "R$ 12.560",
-    change: "+18%",
-    trend: "up",
-    icon: DollarSign,
-  },
-  {
-    label: "Integradores Ativos",
-    value: "48",
-    change: "+5",
-    trend: "up",
-    icon: Users,
-  },
-  {
-    label: "Taxa de Churn",
-    value: "3.2%",
-    change: "-0.8%",
-    trend: "down",
-    icon: TrendingUp,
-  },
-  {
-    label: "Leads Gerados (Total)",
-    value: "2.847",
-    change: "+234",
-    trend: "up",
-    icon: Activity,
-  },
-];
+interface IntegratorRow {
+  id: string;
+  company_name: string;
+  subscription_plan: string | null;
+  subscription_status: string | null;
+  budgets_used: number | null;
+  monthly_budget_limit: number | null;
+  created_at: string;
+}
 
-const recentIntegrators = [
-  { name: "Solar Tech SP", plan: "PRO", mrr: 149.9, status: "ACTIVE", leads: 156 },
-  { name: "Energia Verde RJ", plan: "BASIC", mrr: 69.9, status: "TRIAL", leads: 45 },
-  { name: "Sol & Cia MG", plan: "PRO", mrr: 149.9, status: "ACTIVE", leads: 234 },
-  { name: "Power Solar PR", plan: "BASIC", mrr: 69.9, status: "PAST_DUE", leads: 89 },
-  { name: "Eco Energy SC", plan: "PRO", mrr: 149.9, status: "ACTIVE", leads: 178 },
-];
-
-const statusColors = {
-  ACTIVE: "bg-secondary/10 text-secondary",
-  TRIAL: "bg-accent text-accent-foreground",
-  PAST_DUE: "bg-destructive/10 text-destructive",
-  CANCELED: "bg-muted text-muted-foreground",
+const statusColors: Record<string, string> = {
+  active: "bg-secondary/10 text-secondary",
+  trial: "bg-accent text-accent-foreground",
+  past_due: "bg-destructive/10 text-destructive",
+  canceled: "bg-muted text-muted-foreground",
+  expired: "bg-muted text-muted-foreground",
 };
 
 export default function AdminDashboard() {
+  const [integrators, setIntegrators] = useState<IntegratorRow[]>([]);
+  const [totalLeads, setTotalLeads] = useState(0);
+  const [activeLicenses, setActiveLicenses] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    const [intRes, leadsRes, licRes] = await Promise.all([
+      supabase.from("integrators").select("id, company_name, subscription_plan, subscription_status, budgets_used, monthly_budget_limit, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("leads").select("id", { count: "exact", head: true }),
+      supabase.from("licenses").select("id", { count: "exact", head: true }).eq("status", "active"),
+    ]);
+    setIntegrators(intRes.data || []);
+    setTotalLeads(leadsRes.count || 0);
+    setActiveLicenses(licRes.count || 0);
+  };
+
+  const activeCount = integrators.filter(i => i.subscription_status === "active").length;
+  const trialCount = integrators.filter(i => i.subscription_status === "trial").length;
+  const pastDueCount = integrators.filter(i => i.subscription_status === "past_due").length;
+
+  const mrr = integrators.reduce((acc, i) => {
+    if (i.subscription_status !== "active") return acc;
+    return acc + (i.subscription_plan === "pro" ? 149.90 : 69.90);
+  }, 0);
+
+  const stats = [
+    { label: "MRR Total", value: `R$ ${mrr.toFixed(2).replace(".", ",")}`, icon: DollarSign },
+    { label: "Integradores Ativos", value: `${activeCount}`, icon: Users },
+    { label: "Licenças Ativas", value: `${activeLicenses}`, icon: Key },
+    { label: "Leads Gerados (Total)", value: `${totalLeads}`, icon: Activity },
+  ];
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div>
           <h2 className="text-2xl font-bold">Dashboard Administrativo</h2>
-          <p className="text-muted-foreground">
-            Visão geral da plataforma Leads Solar
-          </p>
+          <p className="text-muted-foreground">Visão geral da plataforma Leads Solar</p>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, index) => (
             <div key={index} className="stat-card">
@@ -74,19 +83,6 @@ export default function AdminDashboard() {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <stat.icon className="h-5 w-5 text-primary" />
                 </div>
-                <span
-                  className={`flex items-center text-sm font-medium ${
-                    stat.trend === "up"
-                      ? "text-secondary"
-                      : stat.trend === "down" && stat.label !== "Taxa de Churn"
-                      ? "text-destructive"
-                      : "text-secondary"
-                  }`}
-                >
-                  {stat.trend === "up" && <ArrowUpRight className="h-4 w-4" />}
-                  {stat.trend === "down" && <ArrowDownRight className="h-4 w-4" />}
-                  {stat.change}
-                </span>
               </div>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
               <p className="text-3xl font-bold">{stat.value}</p>
@@ -94,115 +90,76 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Content Grid */}
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Integrators Table */}
           <div className="lg:col-span-2 card-solar">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Integradores Recentes</h3>
-              <a href="/admin/integrators" className="text-sm text-primary hover:underline">
-                Ver Todos
-              </a>
+              <button onClick={() => navigate("/admin/integrators")} className="text-sm text-primary hover:underline">Ver Todos</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                      Empresa
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                      Plano
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                      MRR
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                      Leads
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
-                      Status
-                    </th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Empresa</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Plano</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Orçamentos</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentIntegrators.map((integrator, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-border/50 hover:bg-muted/50 transition-colors"
-                    >
+                  {integrators.slice(0, 5).map((i) => (
+                    <tr key={i.id} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
+                      <td className="py-3 px-2 font-medium">{i.company_name}</td>
                       <td className="py-3 px-2">
-                        <span className="font-medium">{integrator.name}</span>
-                      </td>
-                      <td className="py-3 px-2">
-                        <span
-                          className={`text-xs font-medium ${
-                            integrator.plan === "PRO"
-                              ? "text-primary"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {integrator.plan}
+                        <span className={`text-xs font-semibold ${i.subscription_plan === "pro" ? "text-primary" : "text-muted-foreground"}`}>
+                          {(i.subscription_plan || "basic").toUpperCase()}
                         </span>
                       </td>
+                      <td className="py-3 px-2">{i.budgets_used || 0}/{i.monthly_budget_limit || 100}</td>
                       <td className="py-3 px-2">
-                        R$ {integrator.mrr.toFixed(2).replace('.', ',')}
-                      </td>
-                      <td className="py-3 px-2">{integrator.leads}</td>
-                      <td className="py-3 px-2">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            statusColors[integrator.status as keyof typeof statusColors]
-                          }`}
-                        >
-                          {integrator.status}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[i.subscription_status || "trial"] || statusColors.trial}`}>
+                          {(i.subscription_status || "trial").toUpperCase()}
                         </span>
                       </td>
                     </tr>
                   ))}
+                  {integrators.length === 0 && (
+                    <tr><td colSpan={4} className="py-8 text-center text-muted-foreground">Nenhum integrador cadastrado ainda</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* Alerts */}
           <div className="space-y-6">
             <div className="card-solar">
-              <h3 className="text-lg font-semibold mb-4">Alertas</h3>
+              <h3 className="text-lg font-semibold mb-4">Resumo</h3>
               <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/10">
-                  <p className="text-sm font-medium text-destructive">
-                    1 integrador com pagamento atrasado
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Power Solar PR - R$ 69,90
-                  </p>
+                <div className="flex justify-between p-3 rounded-lg bg-secondary/5">
+                  <span className="text-sm text-muted-foreground">Ativos</span>
+                  <span className="font-bold text-secondary">{activeCount}</span>
                 </div>
-                <div className="p-3 rounded-lg bg-accent/50 border border-accent/50">
-                  <p className="text-sm font-medium">
-                    2 trials acabando em 3 dias
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Energia Verde RJ, Nova Solar BA
-                  </p>
+                <div className="flex justify-between p-3 rounded-lg bg-accent/30">
+                  <span className="text-sm text-muted-foreground">Em Trial</span>
+                  <span className="font-bold">{trialCount}</span>
+                </div>
+                <div className="flex justify-between p-3 rounded-lg bg-destructive/5">
+                  <span className="text-sm text-muted-foreground">Inadimplentes</span>
+                  <span className="font-bold text-destructive">{pastDueCount}</span>
                 </div>
               </div>
             </div>
 
             <div className="card-solar bg-gradient-to-br from-primary/5 to-primary/10">
-              <h3 className="font-semibold mb-2">📊 Resumo do Mês</h3>
+              <h3 className="font-semibold mb-2">📊 Planos</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Novos integradores</span>
-                  <span className="font-medium">+8</span>
+                  <span className="text-muted-foreground">Básico (R$ 69,90)</span>
+                  <span className="font-medium">{integrators.filter(i => i.subscription_plan === "basic" && i.subscription_status === "active").length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cancelamentos</span>
-                  <span className="font-medium text-destructive">-2</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Upgrades</span>
-                  <span className="font-medium text-secondary">+3</span>
+                  <span className="text-muted-foreground">Pro (R$ 149,90)</span>
+                  <span className="font-medium">{integrators.filter(i => i.subscription_plan === "pro" && i.subscription_status === "active").length}</span>
                 </div>
               </div>
             </div>
