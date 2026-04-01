@@ -69,7 +69,7 @@ export function ChatWidget({
   secondaryColor = "#2D9B83",
   logoUrl,
   welcomeMessage = "Olá! 🌞 Sou o assistente da *{empresa}*. Vou te ajudar a descobrir quanto você pode economizar com energia solar!",
-  closingMessage = "Perfeito, *{nome}*! 🎉\n\n☀️ Kit recomendado: *{kit_nome}*\n⚡ Potência: *{kit_potencia}*\n🔋 Painéis: *{kit_paineis}* unidades\n💰 Investimento: *R$ {kit_preco}*\n📉 Economia estimada: *R$ {economia}/mês*\n\nEm breve um especialista entrará em contato! 📞",
+  closingMessage = "Perfeito, *{nome}*! 🎉\n\n☀️ Kit recomendado: *{kit_nome}*\n⚡ Potência: *{kit_potencia}*\n🔋 Painéis: *{kit_paineis}* unidades\n📐 Área ocupada: *{kit_area}m²*\n💰 Investimento: *R$ {kit_preco}*\n📉 Economia estimada: *R$ {economia}/mês*\n\nEm breve um especialista entrará em contato! 📞",
   questions = defaultQuestions,
   kits = defaultKits,
   embedded = false,
@@ -174,12 +174,15 @@ export function ChatWidget({
     const kit = findKit(consumption) || kits[0];
     const economia = Math.round((kit?.price || 0) / 60);
 
+    const areaOcupada = (kit?.panels || 0) * 2;
+
     let msg = closingMessage
       .replace("{nome}", answers["nome"] || "cliente")
       .replace("{consumo_kwh}", answers["consumo_kwh"] || consumption.toString())
       .replace("{kit_nome}", kit?.name || "Kit Solar")
       .replace("{kit_potencia}", kit?.power || "")
       .replace("{kit_paineis}", kit?.panels?.toString() || "")
+      .replace("{kit_area}", areaOcupada.toString())
       .replace("{kit_preco}", ((kit?.price || 0) + (kit?.installPrice || 0)).toLocaleString("pt-BR"))
       .replace("{economia}", economia.toLocaleString("pt-BR"));
 
