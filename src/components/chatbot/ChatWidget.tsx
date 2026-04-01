@@ -174,12 +174,15 @@ export function ChatWidget({
     const kit = findKit(consumption) || kits[0];
     const economia = Math.round((kit?.price || 0) / 60);
 
+    const areaOcupada = (kit?.panels || 0) * 2;
+
     let msg = closingMessage
       .replace("{nome}", answers["nome"] || "cliente")
       .replace("{consumo_kwh}", answers["consumo_kwh"] || consumption.toString())
       .replace("{kit_nome}", kit?.name || "Kit Solar")
       .replace("{kit_potencia}", kit?.power || "")
       .replace("{kit_paineis}", kit?.panels?.toString() || "")
+      .replace("{kit_area}", areaOcupada.toString())
       .replace("{kit_preco}", ((kit?.price || 0) + (kit?.installPrice || 0)).toLocaleString("pt-BR"))
       .replace("{economia}", economia.toLocaleString("pt-BR"));
 
