@@ -428,6 +428,39 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_plans: {
+        Row: {
+          active: boolean | null
+          budget_limit: number
+          description: string | null
+          features: Json | null
+          id: string
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          budget_limit?: number
+          description?: string | null
+          features?: Json | null
+          id: string
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          budget_limit?: number
+          description?: string | null
+          features?: Json | null
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
