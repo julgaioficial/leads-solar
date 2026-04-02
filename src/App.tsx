@@ -31,6 +31,7 @@ import DashboardSettings from "./pages/dashboard/Settings";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminIntegrators from "./pages/admin/Integrators";
 import AdminLicenses from "./pages/admin/Licenses";
+import AdminPricing from "./pages/admin/Pricing";
 
 // Public White-Label Page
 import WhiteLabelPage from "./pages/public/WhiteLabelPage";
@@ -70,7 +71,7 @@ const App = () => (
             <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/integrators" element={<ProtectedRoute requiredRole="admin"><AdminIntegrators /></ProtectedRoute>} />
             <Route path="/admin/licenses" element={<ProtectedRoute requiredRole="admin"><AdminLicenses /></ProtectedRoute>} />
-            <Route path="/admin/financeiro" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/financeiro" element={<ProtectedRoute requiredRole="admin"><AdminPricing /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
 
             {/* White-Label Public Pages */}
