@@ -31,6 +31,7 @@ import DashboardSettings from "./pages/dashboard/Settings";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminIntegrators from "./pages/admin/Integrators";
 import AdminLicenses from "./pages/admin/Licenses";
+import AdminPricing from "./pages/admin/Pricing";
 
 // Public White-Label Page
 import WhiteLabelPage from "./pages/public/WhiteLabelPage";
