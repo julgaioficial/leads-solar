@@ -75,7 +75,7 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Dashboard Preview */}
+        {/* Video Demo */}
         <div className="mt-16 max-w-5xl mx-auto animate-fade-up stagger-5">
           <div className="relative rounded-2xl border border-border/50 bg-card shadow-2xl overflow-hidden">
             {/* Browser Header */}
@@ -93,30 +93,17 @@ export function Hero() {
               </div>
             </div>
             
-            {/* Dashboard Content Preview */}
-            <div className="p-6 bg-gradient-to-b from-background to-muted/30">
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                {[
-                  { label: "Leads Hoje", value: "24", trend: "+12%" },
-                  { label: "Taxa Conversão", value: "38%", trend: "+5%" },
-                  { label: "Créditos", value: "47/60", trend: "" },
-                ].map((stat, i) => (
-                  <div key={i} className="stat-card">
-                    <p className="text-xs text-muted-foreground">{stat.label}</p>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold">{stat.value}</span>
-                      {stat.trend && (
-                        <span className="text-xs text-secondary">{stat.trend}</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="h-32 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/10" />
-                <div className="h-32 rounded-xl bg-gradient-to-br from-secondary/5 to-secondary/10 border border-secondary/10" />
-              </div>
-            </div>
+            {/* Video */}
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full"
+              poster=""
+            >
+              <source src="/leadssolar-demo.mp4" type="video/mp4" />
+            </video>
           </div>
         </div>
       </div>
